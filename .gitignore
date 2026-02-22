@@ -1,0 +1,109 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# uv
+.python-version
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+
+# Dataset (large files — not tracked in git)
+Dataset_partitioned/
+Dataset_original/
+
+# Output artifacts
+outputs/
+mlruns/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_metadata
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+.dockerignore
+
+# Docs
+docs/
+
+# Tauri build & generated
+demo/tauri-app/src-tauri/target/
+demo/tauri-app/src-tauri/gen/
+demo/tauri-app/node_modules/
+demo/tauri-app/.svelte-kit/
+
+# Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Type checking
+.mypy_cache/
+
+# Cloud
+vertex-scaffold/
+deploy/cloudrun.sh
+
+# Scratchfiles
+scratch/
+ralph-api.sh
+scripts/get_timestamp.py
+scripts/stream_filter_api.py
+
+# AI
+.claude
+CLAUDE*
+
+# Tool caches
+.gradio/
+.playwright-mcp/
+
+# Notebooks
+notebooks/
+
+# Demo
+
+# Model files (safety net)
+*.keras
+!models/*.keras
+*.h5
+*.pb
+*.tflite
+*.onnx
+*.savedmodel
+
+# Archives
+*.rar
+*.zip
+*.tar.gz
+
+# Logs
+*.log
+
+# Legacy dataset directory
+Training/
+files/
