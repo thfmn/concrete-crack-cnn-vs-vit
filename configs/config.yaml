@@ -1,0 +1,36 @@
+#  Copyright (C) 2026 by Tobias Hoffmann
+#  thoffmann-ml@proton.me
+#  https://github.com/thfmn/concrete-crack-cnn-vs-vit
+#
+#  This work is licensed under the MIT License.
+#
+#  Author:    Tobias Hoffmann
+#  Email:     thoffmann-ml@proton.me
+#  License:   MIT
+#  Date:      2026
+#  Package:   concrete-crack-cnn-vs-vit — CNN vs ViT Benchmark
+
+# Main Hydra config — composes model, dataset, augmentation, and training groups.
+# Override any group from the CLI:
+#   python scripts/train.py model=swin_tiny dataset=sdnet2018 aug=heavy
+
+defaults:
+  - model: resnet50
+  - dataset: sdnet2018
+  - aug: medium
+  - training: default
+  - _self_
+
+# Experiment tracking
+experiment:
+  name: crack-classification
+  tracking_uri: mlruns
+  seed: 42
+
+# Output directories
+paths:
+  root: ${hydra:runtime.cwd}
+  checkpoints: ${paths.root}/outputs/checkpoints
+  results: ${paths.root}/outputs/results
+  exports: ${paths.root}/outputs/exports
+  figures: ${paths.root}/outputs/figures

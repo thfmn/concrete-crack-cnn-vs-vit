@@ -1,0 +1,25 @@
+#  Copyright (C) 2026 by Tobias Hoffmann
+#  License: MIT | Package: concrete-crack-cnn-vs-vit
+
+name: sdnet2018
+task: classification
+root: assets/sdnet2018
+num_classes: 2
+class_names:
+  - no_crack
+  - crack
+image_size: 224
+
+# Train/val/test split ratios
+split:
+  train: 0.7
+  val: 0.15
+  test: 0.15
+  stratify: true
+  seed: ${experiment.seed}
+
+# Subsets (bridge decks, pavements, walls)
+subsets:
+  - D
+  - P
+  - W

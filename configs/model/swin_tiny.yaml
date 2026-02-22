@@ -1,0 +1,9 @@
+#  Copyright (C) 2026 by Tobias Hoffmann
+#  License: MIT | Package: concrete-crack-cnn-vs-vit
+
+name: swin_tiny
+timm_name: swin_tiny_patch4_window7_224
+family: vit
+pretrained: true
+num_classes: 2
+image_size: 224

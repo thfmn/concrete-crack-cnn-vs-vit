@@ -1,0 +1,23 @@
+#  Copyright (C) 2026 by Tobias Hoffmann
+#  License: MIT | Package: concrete-crack-cnn-vs-vit
+
+name: crackseg9k
+task: segmentation
+root: assets/crackseg9k
+num_classes: 2
+class_names:
+  - background
+  - crack
+image_size: 224
+
+# Pre-split directories
+images_dir: ${dataset.root}/images
+masks_dir: ${dataset.root}/masks
+
+# Train/val/test split ratios
+split:
+  train: 0.7
+  val: 0.15
+  test: 0.15
+  stratify: false
+  seed: ${experiment.seed}

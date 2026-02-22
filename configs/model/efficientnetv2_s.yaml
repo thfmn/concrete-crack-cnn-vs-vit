@@ -1,0 +1,9 @@
+#  Copyright (C) 2026 by Tobias Hoffmann
+#  License: MIT | Package: concrete-crack-cnn-vs-vit
+
+name: efficientnetv2_s
+timm_name: tf_efficientnetv2_s
+family: cnn
+pretrained: true
+num_classes: 2
+image_size: 224

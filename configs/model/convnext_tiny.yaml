@@ -1,0 +1,9 @@
+#  Copyright (C) 2026 by Tobias Hoffmann
+#  License: MIT | Package: concrete-crack-cnn-vs-vit
+
+name: convnext_tiny
+timm_name: convnext_tiny
+family: cnn
+pretrained: true
+num_classes: 2
+image_size: 224

@@ -1,0 +1,30 @@
+#  Copyright (C) 2026 by Tobias Hoffmann
+#  License: MIT | Package: concrete-crack-cnn-vs-vit
+
+# Default training hyperparameters.
+# Override from CLI: python scripts/train.py training.lr=3e-4 training.batch_size=64
+
+optimizer: adamw
+lr: 1.0e-4
+weight_decay: 0.01
+
+scheduler: cosine
+warmup_epochs: 5
+max_epochs: 50
+
+batch_size: 32
+num_workers: 4
+precision: "16-mixed"
+
+# Early stopping
+early_stopping:
+  monitor: val_loss
+  patience: 10
+  mode: min
+
+# Model checkpoint
+checkpoint:
+  monitor: val_loss
+  mode: min
+  save_top_k: 1
+  filename: "${model.name}_epoch{epoch:02d}_val{val_loss:.4f}"
