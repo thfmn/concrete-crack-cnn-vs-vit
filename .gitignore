@@ -29,6 +29,7 @@ env/
 .env.local
 
 # Dataset (large files — not tracked in git)
+assets/
 Dataset_partitioned/
 Dataset_original/
 
