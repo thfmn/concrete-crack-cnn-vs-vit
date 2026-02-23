@@ -27,19 +27,14 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import albumentations as A
-from albumentations.pytorch import ToTensorV2
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
+from src.data.augmentation import Preset, get_train_transforms, get_val_transforms
 from src.data.classification_dataset import CrackClassificationDataset
 
 # Labels derived from directory name: C* = cracked (1), U* = uncracked (0)
 _CRACKED_PREFIXES = {"CD", "CP", "CW"}
-
-# ImageNet normalization — standard for pretrained timm models
-_IMAGENET_MEAN = [0.485, 0.456, 0.406]
-_IMAGENET_STD = [0.229, 0.224, 0.225]
 
 
 def _label_from_path(rel_path: str) -> int:
@@ -49,33 +44,6 @@ def _label_from_path(rel_path: str) -> int:
     """
     parent = Path(rel_path).parent.name
     return 1 if parent in _CRACKED_PREFIXES else 0
-
-
-def _build_val_transforms(image_size: int) -> A.Compose:
-    """Resize + Normalize only — no random augmentation for val/test."""
-    return A.Compose(
-        [
-            A.Resize(image_size, image_size),
-            A.Normalize(mean=_IMAGENET_MEAN, std=_IMAGENET_STD),
-            ToTensorV2(),
-        ]
-    )
-
-
-def _build_train_transforms(image_size: int) -> A.Compose:
-    """Default training transforms: Resize + HorizontalFlip + Normalize.
-
-    This is a minimal baseline. DATA-7 will replace this with configurable
-    augmentation presets (light/medium/heavy).
-    """
-    return A.Compose(
-        [
-            A.Resize(image_size, image_size),
-            A.HorizontalFlip(p=0.5),
-            A.Normalize(mean=_IMAGENET_MEAN, std=_IMAGENET_STD),
-            ToTensorV2(),
-        ]
-    )
 
 
 class CrackClassificationDM(LightningDataModule):
@@ -97,6 +65,8 @@ class CrackClassificationDM(LightningDataModule):
         num_workers: Background worker processes for data loading (default 4).
             Like tf.data.prefetch(AUTOTUNE) but with explicit parallelism.
         image_size: Target image size in pixels (default 224, the timm standard).
+        aug_preset: Augmentation strength — "light", "medium", or "heavy" (default "light").
+            See src/data/augmentation.py for what each preset includes.
     """
 
     def __init__(
@@ -106,6 +76,7 @@ class CrackClassificationDM(LightningDataModule):
         batch_size: int = 32,
         num_workers: int = 4,
         image_size: int = 224,
+        aug_preset: Preset = "light",
     ) -> None:
         super().__init__()
         self.data_dir = Path(data_dir)
@@ -113,6 +84,7 @@ class CrackClassificationDM(LightningDataModule):
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.image_size = image_size
+        self.aug_preset = aug_preset
 
         # Populated in setup()
         self._train_dataset: CrackClassificationDataset | None = None
@@ -137,7 +109,7 @@ class CrackClassificationDM(LightningDataModule):
             self._train_dataset = CrackClassificationDataset(
                 file_paths=train_paths,
                 labels=train_labels,
-                transform=_build_train_transforms(self.image_size),
+                transform=get_train_transforms(self.aug_preset, self.image_size),
             )
 
             val_paths = [self.data_dir / p for p in splits["val"]]
@@ -145,7 +117,7 @@ class CrackClassificationDM(LightningDataModule):
             self._val_dataset = CrackClassificationDataset(
                 file_paths=val_paths,
                 labels=val_labels,
-                transform=_build_val_transforms(self.image_size),
+                transform=get_val_transforms(self.image_size),
             )
 
         if stage in ("test", None):
@@ -154,7 +126,7 @@ class CrackClassificationDM(LightningDataModule):
             self._test_dataset = CrackClassificationDataset(
                 file_paths=test_paths,
                 labels=test_labels,
-                transform=_build_val_transforms(self.image_size),
+                transform=get_val_transforms(self.image_size),
             )
 
     def train_dataloader(self) -> DataLoader:
