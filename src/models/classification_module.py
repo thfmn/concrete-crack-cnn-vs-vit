@@ -24,7 +24,7 @@ training, validation, test loops, metrics, and optimizer configuration.
 
 from __future__ import annotations
 
-import pytorch_lightning as pl
+import lightning as L
 import timm
 import torch
 import torch.nn.functional as F
@@ -36,7 +36,7 @@ from torchmetrics.classification import (
 )
 
 
-class CrackClassifier(pl.LightningModule):
+class CrackClassifier(L.LightningModule):
     """Binary crack classifier wrapping any timm backbone.
 
     Keras equivalent:

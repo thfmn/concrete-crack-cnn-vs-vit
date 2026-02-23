@@ -34,10 +34,10 @@ and logging — while Hydra manages all configuration and MLflow tracks experime
 from __future__ import annotations
 
 import hydra
-import pytorch_lightning as pl
+import lightning as L
+from lightning.pytorch.callbacks import EarlyStopping, LearningRateMonitor, ModelCheckpoint
+from lightning.pytorch.loggers import MLFlowLogger
 from omegaconf import DictConfig
-from pytorch_lightning.callbacks import EarlyStopping, LearningRateMonitor, ModelCheckpoint
-from pytorch_lightning.loggers import MLFlowLogger
 
 from src.data.classification_dm import CrackClassificationDM
 from src.models.classification_module import CrackClassifier
@@ -49,7 +49,7 @@ def train(cfg: DictConfig) -> None:
 
     # 1. Reproducibility — fixes random seeds for torch, numpy, python random.
     #    Keras equivalent: tf.random.set_seed(42)
-    pl.seed_everything(cfg.experiment.seed, workers=True)
+    L.seed_everything(cfg.experiment.seed, workers=True)
 
     # 2. DataModule — loads SDNET2018 splits and creates train/val/test DataLoaders.
     #    Keras equivalent: tf.keras.utils.image_dataset_from_directory(...)
@@ -110,7 +110,7 @@ def train(cfg: DictConfig) -> None:
     #    Keras equivalent: model.fit(epochs=N) but with built-in support for
     #    mixed precision, multi-GPU, gradient clipping, and more.
     #    precision="16-mixed" ≈ tf.keras.mixed_precision.set_global_policy("mixed_float16")
-    trainer = pl.Trainer(
+    trainer = L.Trainer(
         max_epochs=cfg.training.max_epochs,
         precision=cfg.training.precision,
         logger=logger,

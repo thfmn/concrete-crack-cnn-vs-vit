@@ -31,7 +31,7 @@ import json
 import logging
 from pathlib import Path
 
-from pytorch_lightning import LightningDataModule
+from lightning.pytorch import LightningDataModule
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 

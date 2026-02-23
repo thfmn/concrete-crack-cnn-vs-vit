@@ -25,7 +25,7 @@ Usage:
 
 from __future__ import annotations
 
-import pytorch_lightning as L
+import lightning as L
 import timm
 import torch
 import torchmetrics

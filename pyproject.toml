@@ -10,7 +10,7 @@ dependencies = [
     # Core deep learning
     "torch>=2.2",
     "torchvision>=0.17",
-    "pytorch-lightning>=2.2",
+    "lightning>=2.2",
     # Model zoos
     "timm>=1.0",
     "segmentation-models-pytorch>=0.3",
@@ -34,12 +34,14 @@ dependencies = [
     "pandas>=2.1",
     "matplotlib>=3.8",
     "seaborn>=0.13",
+    "plotly>=5.18",
     "scikit-learn>=1.4",
     # DX / logging
     "loguru>=0.7",
     "rich>=13.0",
     "tqdm>=4.66",
     "jupyterlab>=4.5.4",
+    "kaggle>=1.7.4.5",
 ]
 
 [project.urls]
@@ -65,6 +67,9 @@ packages = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+markers = [
+    "integration: end-to-end tests using real images from tests/fixtures/",
+]
 
 [tool.ruff]
 line-length = 100
