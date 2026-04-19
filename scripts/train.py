@@ -33,11 +33,14 @@ and logging — while Hydra manages all configuration and MLflow tracks experime
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import hydra
 import lightning as L
 from lightning.pytorch.callbacks import EarlyStopping, LearningRateMonitor, ModelCheckpoint
-from lightning.pytorch.loggers import MLFlowLogger
-from omegaconf import DictConfig
+from lightning.pytorch.loggers import CSVLogger, MLFlowLogger
+from omegaconf import DictConfig, OmegaConf
 
 from src.data.classification_dm import CrackClassificationDM
 from src.models.classification_module import CrackClassifier
@@ -75,14 +78,19 @@ def train(cfg: DictConfig) -> None:
         max_epochs=cfg.training.max_epochs,
     )
 
-    # 4. MLflow logger — tracks metrics, hyperparameters, and artifacts.
-    #    Keras equivalent: manual mlflow.log_metric() calls in a custom callback.
-    #    Lightning's MLFlowLogger does this automatically for every self.log() call.
-    logger = MLFlowLogger(
+    # 4. Loggers — dual logging to MLflow (interactive tracking) and CSV (portable export).
+    #    CSVLogger produces metrics.csv + hparams.yaml that can be synced to MLflow
+    #    from any environment (e.g. Kaggle) that lacks a tracking server.
+    mlflow_logger = MLFlowLogger(
         experiment_name=cfg.experiment.name,
         tracking_uri=cfg.experiment.tracking_uri,
         log_model=False,
     )
+    csv_logger = CSVLogger(
+        save_dir=cfg.paths.results,
+        name=cfg.experiment.name,
+    )
+    loggers = [mlflow_logger, csv_logger]
 
     # 5. Callbacks — Lightning callbacks ≈ Keras callbacks, same concept.
     callbacks = [
@@ -113,7 +121,7 @@ def train(cfg: DictConfig) -> None:
     trainer = L.Trainer(
         max_epochs=cfg.training.max_epochs,
         precision=cfg.training.precision,
-        logger=logger,
+        logger=loggers,
         callbacks=callbacks,
         deterministic=True,
     )
@@ -124,16 +132,30 @@ def train(cfg: DictConfig) -> None:
     # 8. Test — evaluate on held-out test set using the best checkpoint.
     #    Keras equivalent: model.load_weights(best_ckpt); model.evaluate(test_ds)
     #    ckpt_path="best" tells Lightning to load the best checkpoint from ModelCheckpoint.
-    trainer.test(model, datamodule=dm, ckpt_path="best")
+    test_results = trainer.test(model, datamodule=dm, ckpt_path="best")
 
     # 9. Log the best checkpoint path to MLflow for easy retrieval.
     best_path = trainer.checkpoint_callback.best_model_path
-    if best_path and logger.experiment:
-        logger.experiment.log_param(
-            logger.run_id,
+    if best_path and mlflow_logger.experiment:
+        mlflow_logger.experiment.log_param(
+            mlflow_logger.run_id,
             "best_checkpoint_path",
             best_path,
         )
+
+    # 10. Save portable outputs to CSVLogger version dir.
+    #     These files make the run self-contained and downloadable from Kaggle.
+    version_dir = Path(csv_logger.log_dir)
+
+    # Resolved Hydra config — full snapshot of all settings for this run
+    OmegaConf.save(cfg, version_dir / "config.yaml")
+
+    # Summary — best checkpoint path + final test metrics
+    summary = {
+        "best_checkpoint_path": best_path,
+        "test_metrics": test_results[0] if test_results else {},
+    }
+    (version_dir / "summary.json").write_text(json.dumps(summary, indent=2))
 
 
 if __name__ == "__main__":
