@@ -24,7 +24,7 @@ defaults:
 # Experiment tracking
 experiment:
   name: crack-classification
-  tracking_uri: mlruns
+  tracking_uri: sqlite:///mlflow.db
   seed: 42
 
 # Output directories
