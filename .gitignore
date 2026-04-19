@@ -114,3 +114,5 @@ files/
 
 # Kaggle kernel configs (contain user-specific dataset IDs)
 kaggle/
+mlflow.db*
+node_modules/
