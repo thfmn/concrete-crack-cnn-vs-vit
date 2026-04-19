@@ -1,0 +1,57 @@
+# dashboard/tickets.yaml
+# Manually edited — the dashboard reads this on every refresh.
+# Status values: done | in_progress | todo
+
+epics:
+  - id: SETUP
+    title: "Environment & Tooling Setup"
+    color: "#4ade80"
+    tickets:
+      - { id: SETUP-4, title: "PyTorch hello world forward pass", status: done }
+      - { id: SETUP-5, title: "timm model zoo exploration", status: done }
+      - { id: SETUP-6, title: "Lightning hello world training loop", status: done }
+      - { id: SETUP-8, title: "MLflow hello world logging demo", status: done }
+      - { id: SETUP-9, title: "Environment config (.env.example)", status: done }
+
+  - id: DATA
+    title: "Data Pipeline"
+    color: "#38bdf8"
+    tickets:
+      - { id: DATA-4, title: "Stratified train/val/test split for SDNET2018", status: done }
+      - { id: DATA-5, title: "Classification Dataset and DataModule", status: done }
+      - { id: DATA-7, title: "Albumentations augmentation presets", status: done }
+      - { id: DATA-8, title: "Segmentation Dataset and DataModule for CrackSeg9k", status: done }
+      - { id: DATA-9, title: "Classification pipeline unit tests", status: done }
+      - { id: DATA-10, title: "Segmentation pipeline unit tests", status: done }
+      - { id: DATA-11, title: "End-to-end data pipeline smoke test", status: done }
+
+  - id: CLS
+    title: "Classification Models"
+    color: "#a78bfa"
+    tickets:
+      - { id: CLS-1, title: "Classification LightningModule", status: done }
+      - { id: CLS-2, title: "Hydra-based training script + smoke tests", status: done }
+      - { id: CLS-3, title: "Run all 6 models on SDNET2018", status: todo }
+
+  - id: SEG
+    title: "Segmentation Models"
+    color: "#fb923c"
+    tickets:
+      - { id: SEG-1, title: "Segmentation LightningModule (smp wrapper)", status: todo }
+      - { id: SEG-2, title: "Segmentation training script", status: todo }
+      - { id: SEG-3, title: "Run all models on CrackSeg9k", status: todo }
+
+  - id: EVAL
+    title: "Evaluation & Visualization"
+    color: "#f472b6"
+    tickets:
+      - { id: EVAL-1, title: "Evaluation script (metrics comparison)", status: todo }
+      - { id: EVAL-2, title: "CNN vs ViT comparison plots", status: todo }
+      - { id: EVAL-3, title: "Attention map visualization", status: todo }
+
+  - id: EXPORT
+    title: "Export & Benchmarks"
+    color: "#fbbf24"
+    tickets:
+      - { id: EXPORT-1, title: "ONNX export script", status: todo }
+      - { id: EXPORT-2, title: "Inference benchmarks (latency, throughput)", status: todo }

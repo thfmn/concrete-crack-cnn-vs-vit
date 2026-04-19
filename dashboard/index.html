@@ -1,0 +1,1027 @@
+<!--
+  Copyright (C) 2026 by Tobias Hoffmann
+  thoffmann-ml@proton.me
+  https://github.com/thfmn/concrete-crack-cnn-vs-vit
+
+  This work is licensed under the MIT License.
+
+  Author:    Tobias Hoffmann
+  Email:     thoffmann-ml@proton.me
+  License:   MIT
+  Date:      2026
+  Package:   concrete-crack-cnn-vs-vit — CNN vs ViT Benchmark
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CNN vs ViT — Project Cockpit</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<style>
+/* ── Reset & Base ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #0f1117;
+  --bg-card:   #1a1d27;
+  --border:    #2a2d3a;
+  --text:      #e2e8f0;
+  --text-dim:  #94a3b8;
+  --text-muted:#64748b;
+  --green:     #4ade80;
+  --amber:     #f59e0b;
+  --red:       #ef4444;
+  --blue:      #3b82f6;
+  --purple:    #a78bfa;
+  --pink:      #f472b6;
+  --orange:    #fb923c;
+  --cyan:      #38bdf8;
+  --yellow:    #fbbf24;
+  --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+  --radius:    6px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 0;
+}
+
+/* ── Header ───────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-title {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.header-title span { color: var(--text-dim); font-weight: 400; }
+
+.header-meta {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-size: 12px;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+
+.header-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-progress-bar {
+  width: 120px;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.header-progress-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.refresh-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  transition: opacity 0.3s;
+}
+
+.refresh-dot.loading {
+  animation: pulse 0.6s ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ── Sections ─────────────────────────────────────────────── */
+.section {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+}
+
+.section-badge {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  padding: 2px 8px;
+  background: var(--border);
+  border-radius: 10px;
+}
+
+/* ── Ticket Board ─────────────────────────────────────────── */
+.epic-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.epic-row:last-child { border-bottom: none; }
+
+.epic-label {
+  min-width: 200px;
+  flex-shrink: 0;
+}
+
+.epic-name {
+  font-weight: 600;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.epic-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.epic-progress-text {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.epic-bar {
+  width: 100%;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+
+.epic-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+.epic-tickets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1;
+}
+
+.ticket-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  border: 1px solid var(--border);
+  cursor: default;
+  transition: background 0.2s;
+}
+
+.ticket-pill:hover { background: rgba(255,255,255,0.05); }
+
+.ticket-pill[data-status="done"] {
+  border-color: rgba(74,222,128,0.3);
+  color: var(--green);
+}
+
+.ticket-pill[data-status="in_progress"] {
+  border-color: rgba(245,158,11,0.3);
+  color: var(--amber);
+}
+
+.ticket-pill[data-status="todo"] {
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
+.ticket-check { font-size: 10px; }
+
+.ticket-pill[data-status="done"] .ticket-check::before { content: "✓"; }
+.ticket-pill[data-status="in_progress"] .ticket-check::before { content: "◉"; }
+.ticket-pill[data-status="todo"] .ticket-check::before { content: "○"; }
+
+.ticket-pill .ticket-title {
+  display: none;
+  position: absolute;
+  top: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: var(--text);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: var(--font-sans);
+  white-space: nowrap;
+  z-index: 10;
+  pointer-events: none;
+  border: 1px solid var(--border);
+}
+
+.ticket-pill {
+  position: relative;
+}
+
+.ticket-pill:hover .ticket-title { display: block; }
+
+/* ── Data Flow Diagram ────────────────────────────────────── */
+.pipeline-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.pipeline {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 8px 0;
+}
+
+.pipeline-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.pipeline-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  min-width: 120px;
+  text-align: center;
+  transition: border-color 0.3s;
+}
+
+.pipeline-node[data-status="done"] { border-color: var(--green); }
+.pipeline-node[data-status="partial"] { border-color: var(--amber); border-style: dashed; }
+.pipeline-node[data-status="missing"] { border-color: var(--text-muted); border-style: dashed; }
+
+.pipeline-node-name {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.pipeline-node-sub {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.pipeline-node-status {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-top: 2px;
+}
+
+.pipeline-node[data-status="done"] .pipeline-node-status { background: var(--green); }
+.pipeline-node[data-status="partial"] .pipeline-node-status { background: var(--amber); }
+.pipeline-node[data-status="missing"] .pipeline-node-status {
+  background: transparent;
+  border: 1px solid var(--text-muted);
+}
+
+.pipeline-arrow {
+  width: 32px;
+  height: 2px;
+  background: var(--border);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.pipeline-arrow::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  top: -4px;
+  border: 5px solid transparent;
+  border-left-color: var(--border);
+}
+
+/* ── MLflow Metrics ───────────────────────────────────────── */
+.metrics-empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--text-muted);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+}
+
+.metrics-empty code {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 12px;
+  background: var(--bg);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.metrics-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.metrics-table th {
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.metrics-table td {
+  padding: 8px 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.metrics-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+.metric-best { color: var(--green); font-weight: 600; }
+
+.status-badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.status-badge.finished { background: rgba(74,222,128,0.15); color: var(--green); }
+.status-badge.running { background: rgba(245,158,11,0.15); color: var(--amber); }
+.status-badge.failed { background: rgba(239,68,68,0.15); color: var(--red); }
+
+/* ── Live Training Charts ─────────────────────────────────── */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.chart-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.chart-card-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.chart-run-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+
+.chart-run-info .model-name {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--cyan);
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: live-blink 1.5s ease-in-out infinite;
+}
+
+@keyframes live-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ── Git Activity ─────────────────────────────────────────── */
+.git-log {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.git-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.git-entry:last-child { border-bottom: none; }
+
+.git-hash {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--blue);
+  flex-shrink: 0;
+  min-width: 64px;
+}
+
+.git-message {
+  flex: 1;
+  word-break: break-word;
+}
+
+.git-ticket-ref {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  padding: 0 3px;
+  border-radius: 3px;
+  font-size: 11px;
+}
+
+.git-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+  min-width: 100px;
+  text-align: right;
+}
+
+.branch-badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 2px 8px;
+  background: rgba(59,130,246,0.15);
+  color: var(--blue);
+  border-radius: 10px;
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-title">
+    CNN vs ViT <span>— Project Cockpit</span>
+  </div>
+  <div class="header-meta">
+    <div class="header-progress">
+      <span id="progress-text">–/–</span>
+      <div class="header-progress-bar">
+        <div class="header-progress-fill" id="progress-fill" style="width: 0%"></div>
+      </div>
+    </div>
+    <span id="refresh-time">loading...</span>
+    <div class="refresh-dot" id="refresh-dot"></div>
+  </div>
+</header>
+
+<!-- Ticket Board -->
+<section class="section" id="section-tickets">
+  <div class="section-header">
+    <span class="section-title">Ticket Board</span>
+    <span class="section-badge" id="ticket-summary">–</span>
+  </div>
+  <div id="ticket-board"></div>
+</section>
+
+<!-- Data Flow Diagram -->
+<section class="section" id="section-dataflow">
+  <div class="section-header">
+    <span class="section-title">Architecture — Data Flow</span>
+  </div>
+  <div id="dataflow" class="pipeline-container"></div>
+</section>
+
+<!-- Live Training Charts -->
+<section class="section" id="section-charts">
+  <div class="section-header">
+    <span class="section-title">Training Progress</span>
+    <span class="section-badge" id="chart-status">–</span>
+  </div>
+  <div id="chart-run-info" class="chart-run-info" style="display:none"></div>
+  <div id="charts-container" class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-card-title">Loss</div>
+      <canvas id="chart-loss"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title">Accuracy / F1</div>
+      <canvas id="chart-acc"></canvas>
+    </div>
+  </div>
+  <div id="charts-empty" class="metrics-empty" style="display:none">
+    No training history yet.<br>
+    <code>uv run python scripts/train.py model=resnet50</code>
+  </div>
+</section>
+
+<!-- MLflow Metrics -->
+<section class="section" id="section-mlflow">
+  <div class="section-header">
+    <span class="section-title">MLflow Metrics</span>
+    <span class="section-badge" id="mlflow-summary">–</span>
+  </div>
+  <div id="mlflow-content"></div>
+</section>
+
+<!-- Git Activity -->
+<section class="section" id="section-git">
+  <div class="section-header">
+    <span class="section-title">Git Activity</span>
+    <span id="git-branch"></span>
+  </div>
+  <div id="git-log" class="git-log"></div>
+</section>
+
+<script>
+/* ── State & Config ───────────────────────────────────────── */
+const REFRESH_INTERVAL = 30000; // 30 seconds
+
+// Map epic IDs to their colors (populated from ticket data)
+let epicColors = {};
+
+/* ── Boot ─────────────────────────────────────────────────── */
+document.addEventListener("DOMContentLoaded", () => {
+  refreshAll();
+  setInterval(refreshAll, REFRESH_INTERVAL);
+});
+
+/* ── Data Fetching ────────────────────────────────────────── */
+async function refreshAll() {
+  const dot = document.getElementById("refresh-dot");
+  dot.classList.add("loading");
+
+  try {
+    const [tickets, mlflow, git, status, history] = await Promise.all([
+      fetchJSON("/api/tickets"),
+      fetchJSON("/api/mlflow"),
+      fetchJSON("/api/git"),
+      fetchJSON("/api/status"),
+      fetchJSON("/api/mlflow/history"),
+    ]);
+
+    // Build epic color map
+    if (tickets.epics) {
+      epicColors = {};
+      tickets.epics.forEach(e => { epicColors[e.id] = e.color; });
+    }
+
+    renderHeader(tickets);
+    renderTicketBoard(tickets);
+    renderDataFlow(status);
+    renderMLflow(mlflow);
+    renderCharts(history);
+    renderGitActivity(git);
+  } catch (err) {
+    console.error("Refresh failed:", err);
+  }
+
+  // Update timestamp
+  const now = new Date();
+  document.getElementById("refresh-time").textContent =
+    now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+
+  setTimeout(() => dot.classList.remove("loading"), 600);
+}
+
+async function fetchJSON(url) {
+  const resp = await fetch(url);
+  return resp.json();
+}
+
+/* ── Render: Header ───────────────────────────────────────── */
+function renderHeader(tickets) {
+  const s = tickets.summary || { done: 0, total: 0 };
+  const pct = s.total > 0 ? Math.round((s.done / s.total) * 100) : 0;
+
+  document.getElementById("progress-text").textContent = `${s.done}/${s.total}`;
+  document.getElementById("progress-fill").style.width = pct + "%";
+}
+
+/* ── Render: Ticket Board ─────────────────────────────────── */
+function renderTicketBoard(tickets) {
+  const board = document.getElementById("ticket-board");
+  const summary = document.getElementById("ticket-summary");
+
+  if (!tickets.epics || tickets.epics.length === 0) {
+    board.innerHTML = '<div class="metrics-empty">No tickets defined in tickets.yaml</div>';
+    return;
+  }
+
+  const s = tickets.summary;
+  summary.textContent = `${s.done} done · ${s.in_progress} active · ${s.todo} todo`;
+
+  board.innerHTML = tickets.epics.map(epic => {
+    const pct = epic.progress.total > 0
+      ? Math.round((epic.progress.done / epic.progress.total) * 100)
+      : 0;
+
+    const pills = epic.tickets.map(t => `
+      <div class="ticket-pill" data-status="${t.status}">
+        <span class="ticket-check"></span>
+        <span>${t.id}</span>
+        <span class="ticket-title">${t.title}</span>
+      </div>
+    `).join("");
+
+    return `
+      <div class="epic-row">
+        <div class="epic-label">
+          <div class="epic-name">
+            <span class="epic-dot" style="background: ${epic.color}"></span>
+            ${epic.id} — ${epic.title}
+          </div>
+          <div class="epic-progress-text">${epic.progress.done}/${epic.progress.total}</div>
+          <div class="epic-bar">
+            <div class="epic-bar-fill" style="width: ${pct}%; background: ${epic.color}"></div>
+          </div>
+        </div>
+        <div class="epic-tickets">${pills}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+/* ── Render: Data Flow Diagram ────────────────────────────── */
+function renderDataFlow(status) {
+  const container = document.getElementById("dataflow");
+  const c = status.components || {};
+
+  // Classification pipeline
+  const clsNodes = [
+    { name: "SDNET2018",             sub: "assets/sdnet2018/",                   status: "done" },
+    { name: "ClassificationDM",      sub: "src/data/classification_dm.py",       status: c.classification_dm?.status || "missing" },
+    { name: "timm encoder",          sub: "src/models/classification_module.py", status: c.classification_module?.status || "missing" },
+    { name: "MLflow",                sub: "mlruns/",                             status: "done" },
+    { name: "outputs/",              sub: "checkpoints + results",               status: "partial" },
+  ];
+
+  // Segmentation pipeline
+  const segNodes = [
+    { name: "CrackSeg9k",           sub: "assets/crackseg9k/",                  status: "done" },
+    { name: "SegmentationDM",        sub: "src/data/segmentation_dm.py",         status: c.segmentation_dm?.status || "missing" },
+    { name: "smp decoder",           sub: "src/models/segmentation_module.py",   status: c.segmentation_module?.status || "missing" },
+    { name: "MLflow",                sub: "mlruns/",                             status: "done" },
+    { name: "outputs/",              sub: "exports + figures",                   status: "partial" },
+  ];
+
+  const pipelineReady = status.pipelines || {};
+
+  container.innerHTML = `
+    <div>
+      <div class="pipeline-label">Classification Pipeline
+        ${pipelineReady.classification ? `<span style="color: var(--text-muted); font-weight: 400"> — ${pipelineReady.classification.percent}% ready</span>` : ""}
+      </div>
+      <div class="pipeline">${renderPipelineNodes(clsNodes)}</div>
+    </div>
+    <div>
+      <div class="pipeline-label">Segmentation Pipeline
+        ${pipelineReady.segmentation ? `<span style="color: var(--text-muted); font-weight: 400"> — ${pipelineReady.segmentation.percent}% ready</span>` : ""}
+      </div>
+      <div class="pipeline">${renderPipelineNodes(segNodes)}</div>
+    </div>
+  `;
+}
+
+function renderPipelineNodes(nodes) {
+  return nodes.map((node, i) => {
+    const nodeHTML = `
+      <div class="pipeline-node" data-status="${node.status}">
+        <span class="pipeline-node-name">${node.name}</span>
+        <span class="pipeline-node-sub">${node.sub}</span>
+        <span class="pipeline-node-status"></span>
+      </div>
+    `;
+    const arrow = i < nodes.length - 1 ? '<div class="pipeline-arrow"></div>' : "";
+    return nodeHTML + arrow;
+  }).join("");
+}
+
+/* ── Render: MLflow Metrics ───────────────────────────────── */
+function renderMLflow(mlflow) {
+  const content = document.getElementById("mlflow-content");
+  const summary = document.getElementById("mlflow-summary");
+
+  // Filter out experiments with no runs
+  const withRuns = (mlflow.experiments || []).filter(e => e.runs.length > 0);
+
+  if (withRuns.length === 0 || !mlflow.has_training_runs) {
+    const totalRuns = withRuns.reduce((n, e) => n + e.runs.length, 0);
+    summary.textContent = totalRuns > 0 ? `${totalRuns} demo runs` : "no runs";
+    content.innerHTML = `
+      <div class="metrics-empty">
+        No training runs yet.<br>
+        <code>uv run python scripts/train.py model=resnet50 dataset=sdnet2018 aug=medium</code>
+      </div>
+    `;
+    return;
+  }
+
+  // Collect all runs with their metrics
+  const allRuns = [];
+  withRuns.forEach(exp => {
+    exp.runs.forEach(run => {
+      allRuns.push({ experiment: exp.name, ...run });
+    });
+  });
+
+  // Find best values for highlighting
+  const metricKeys = ["val_acc", "val_f1", "val_precision", "val_recall"];
+  const bestValues = {};
+  metricKeys.forEach(key => {
+    const values = allRuns.map(r => r.metrics[key]).filter(v => v !== undefined);
+    if (values.length > 0) bestValues[key] = Math.max(...values);
+  });
+
+  // Also find best (lowest) val_loss
+  const lossValues = allRuns.map(r => r.metrics.val_loss).filter(v => v !== undefined);
+  if (lossValues.length > 0) bestValues.val_loss = Math.min(...lossValues);
+
+  summary.textContent = `${allRuns.length} runs across ${withRuns.length} experiments`;
+
+  content.innerHTML = `
+    <table class="metrics-table">
+      <thead>
+        <tr>
+          <th>Run</th>
+          <th>Model</th>
+          <th>Status</th>
+          <th>val_acc</th>
+          <th>val_f1</th>
+          <th>val_loss</th>
+          <th>val_prec</th>
+          <th>val_rec</th>
+          <th>Duration</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${allRuns.map(run => {
+          const model = run.params.model_name || run.params.model || "–";
+          const statusClass = run.status.toLowerCase();
+          const fmt = (key) => {
+            const v = run.metrics[key];
+            if (v === undefined) return "–";
+            const isBest = bestValues[key] !== undefined && v === bestValues[key] && allRuns.length > 1;
+            return `<span class="${isBest ? "metric-best" : ""}">${v.toFixed(4)}</span>`;
+          };
+          const duration = run.duration_s > 0 ? formatDuration(run.duration_s) : "–";
+
+          return `
+            <tr>
+              <td>${run.run_name}</td>
+              <td>${model}</td>
+              <td><span class="status-badge ${statusClass}">${run.status}</span></td>
+              <td>${fmt("val_acc")}</td>
+              <td>${fmt("val_f1")}</td>
+              <td>${fmt("val_loss")}</td>
+              <td>${fmt("val_precision")}</td>
+              <td>${fmt("val_recall")}</td>
+              <td>${duration}</td>
+            </tr>
+          `;
+        }).join("")}
+      </tbody>
+    </table>
+  `;
+}
+
+function formatDuration(seconds) {
+  if (seconds < 60) return Math.round(seconds) + "s";
+  if (seconds < 3600) return Math.round(seconds / 60) + "m";
+  const h = Math.floor(seconds / 3600);
+  const m = Math.round((seconds % 3600) / 60);
+  return h + "h " + m + "m";
+}
+
+/* ── Render: Git Activity ─────────────────────────────────── */
+function renderGitActivity(git) {
+  const log = document.getElementById("git-log");
+  const branchEl = document.getElementById("git-branch");
+
+  branchEl.innerHTML = `<span class="branch-badge">${git.branch || "–"}</span>`;
+
+  if (!git.commits || git.commits.length === 0) {
+    log.innerHTML = '<div class="metrics-empty">No git history available</div>';
+    return;
+  }
+
+  log.innerHTML = git.commits.map(commit => {
+    // Highlight ticket references in the message
+    let message = escapeHTML(commit.message);
+    message = message.replace(/([A-Z]+-\d+)/g, (match) => {
+      const epicId = match.replace(/-\d+$/, "");
+      const color = epicColors[epicId] || "var(--blue)";
+      return `<span class="git-ticket-ref" style="background: ${color}22; color: ${color}">${match}</span>`;
+    });
+
+    return `
+      <div class="git-entry">
+        <span class="git-hash">${commit.short_hash}</span>
+        <span class="git-message">${message}</span>
+        <span class="git-meta">${commit.relative_time}</span>
+      </div>
+    `;
+  }).join("");
+}
+
+/* ── Render: Live Training Charts ─────────────────────────── */
+let lossChart = null;
+let accChart = null;
+
+const CHART_DEFAULTS = {
+  responsive: true,
+  animation: { duration: 400 },
+  interaction: { mode: "index", intersect: false },
+  plugins: {
+    legend: {
+      labels: { color: "#94a3b8", font: { size: 11, family: "system-ui" }, boxWidth: 12 },
+    },
+  },
+  scales: {
+    x: {
+      title: { display: true, text: "Epoch", color: "#64748b", font: { size: 11 } },
+      ticks: { color: "#64748b", font: { size: 10 } },
+      grid: { color: "rgba(42,45,58,0.6)" },
+    },
+    y: {
+      ticks: { color: "#64748b", font: { size: 10 } },
+      grid: { color: "rgba(42,45,58,0.6)" },
+    },
+  },
+};
+
+function makeDataset(label, data, color) {
+  return {
+    label,
+    data,
+    borderColor: color,
+    backgroundColor: color + "22",
+    borderWidth: 2,
+    pointRadius: 3,
+    pointHoverRadius: 5,
+    tension: 0.3,
+    fill: false,
+  };
+}
+
+function renderCharts(history) {
+  const statusEl = document.getElementById("chart-status");
+  const runInfo = document.getElementById("chart-run-info");
+  const container = document.getElementById("charts-container");
+  const empty = document.getElementById("charts-empty");
+
+  if (!history.run) {
+    statusEl.textContent = "no data";
+    runInfo.style.display = "none";
+    container.style.display = "none";
+    empty.style.display = "block";
+    return;
+  }
+
+  const run = history.run;
+  const m = run.metrics;
+
+  // Check we have at least some history
+  const hasData = Object.values(m).some(arr => arr && arr.length > 1);
+  if (!hasData) {
+    statusEl.textContent = "waiting for epoch 1...";
+    runInfo.style.display = "none";
+    container.style.display = "none";
+    empty.style.display = "block";
+    return;
+  }
+
+  container.style.display = "grid";
+  empty.style.display = "none";
+
+  // Run info bar
+  const isLive = run.status === "RUNNING";
+  statusEl.textContent = isLive ? "live" : run.status.toLowerCase();
+  runInfo.style.display = "flex";
+  runInfo.innerHTML = `
+    ${isLive ? '<span class="live-dot"></span>' : ""}
+    <span class="model-name">${run.model}</span>
+    <span style="color: var(--text-muted)">${run.run_name}</span>
+    <span style="color: var(--text-muted); font-family: var(--font-mono); font-size: 12px">
+      epoch ${Math.max(...Object.values(m).flatMap(a => a.map(p => p.step)), 0)}
+    </span>
+  `;
+
+  // Extract data arrays — steps as labels, values as data
+  const toPoints = (key) => (m[key] || []).map(p => ({ x: p.step, y: p.value }));
+  const labels = (m.val_loss || m.train_loss || []).map(p => p.step);
+
+  // Loss chart
+  const lossDatasets = [];
+  if (m.train_loss?.length) lossDatasets.push(makeDataset("train_loss", m.train_loss.map(p => p.value), "#fb923c"));
+  if (m.val_loss?.length)   lossDatasets.push(makeDataset("val_loss",   m.val_loss.map(p => p.value),   "#ef4444"));
+
+  if (lossChart) {
+    lossChart.data.labels = labels;
+    lossChart.data.datasets = lossDatasets;
+    lossChart.update("none");
+  } else {
+    lossChart = new Chart(document.getElementById("chart-loss"), {
+      type: "line",
+      data: { labels, datasets: lossDatasets },
+      options: CHART_DEFAULTS,
+    });
+  }
+
+  // Accuracy / F1 chart
+  const accDatasets = [];
+  if (m.val_acc?.length) accDatasets.push(makeDataset("val_acc", m.val_acc.map(p => p.value), "#4ade80"));
+  if (m.val_f1?.length)  accDatasets.push(makeDataset("val_f1",  m.val_f1.map(p => p.value),  "#3b82f6"));
+
+  const accOptions = { ...CHART_DEFAULTS, scales: {
+    ...CHART_DEFAULTS.scales,
+    y: { ...CHART_DEFAULTS.scales.y, min: 0, max: 1 },
+  }};
+
+  if (accChart) {
+    accChart.data.labels = labels;
+    accChart.data.datasets = accDatasets;
+    accChart.update("none");
+  } else {
+    accChart = new Chart(document.getElementById("chart-acc"), {
+      type: "line",
+      data: { labels, datasets: accDatasets },
+      options: accOptions,
+    });
+  }
+}
+
+function escapeHTML(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+</script>
+</body>
+</html>
