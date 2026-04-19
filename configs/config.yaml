@@ -25,6 +25,7 @@ defaults:
 experiment:
   name: crack-classification
   tracking_uri: sqlite:///mlflow.db
+  purpose: baseline
   seed: 42
 
 # Output directories

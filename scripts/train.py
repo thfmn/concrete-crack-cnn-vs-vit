@@ -57,9 +57,14 @@ def train(cfg: DictConfig) -> None:
         max_epochs=cfg.training.max_epochs,
     )
 
+    run_name = f"{cfg.model.name}_{cfg.experiment.purpose}"
+    if cfg.aug.name != "medium":
+        run_name = f"{run_name}_{cfg.aug.name}"
+
     mlflow_logger = MLFlowLogger(
         experiment_name=cfg.experiment.name,
         tracking_uri=cfg.experiment.tracking_uri,
+        run_name=run_name,
         log_model=False,
     )
     csv_logger = CSVLogger(
