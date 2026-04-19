@@ -19,7 +19,8 @@ precision: "16-mixed"
 # Early stopping
 early_stopping:
   monitor: val_loss
-  patience: 10
+  patience: 5
+  min_delta: 0.005
   mode: min
 
 # Model checkpoint

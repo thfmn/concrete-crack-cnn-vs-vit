@@ -79,6 +79,7 @@ def train(cfg: DictConfig) -> None:
         EarlyStopping(
             monitor=cfg.training.early_stopping.monitor,
             patience=cfg.training.early_stopping.patience,
+            min_delta=cfg.training.early_stopping.min_delta,
             mode=cfg.training.early_stopping.mode,
         ),
         LearningRateMonitor(logging_interval="step"),
