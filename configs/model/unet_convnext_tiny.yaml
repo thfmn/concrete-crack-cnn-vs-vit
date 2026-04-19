@@ -1,0 +1,10 @@
+#  Copyright (C) 2026 by Tobias Hoffmann
+#  License: MIT | Package: concrete-crack-cnn-vs-vit
+
+name: unet_convnext_tiny
+encoder_name: tu-convnext_tiny
+decoder: unet
+family: cnn
+pretrained: true
+num_classes: 1
+image_size: 224
