@@ -1,0 +1,10 @@
+#  Copyright (C) 2026 by Tobias Hoffmann
+#  License: MIT | Package: concrete-crack-cnn-vs-vit
+
+name: unet_resnet50
+encoder_name: resnet50
+decoder: unet
+family: cnn
+pretrained: true
+num_classes: 1
+image_size: 224
