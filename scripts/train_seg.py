@@ -44,6 +44,9 @@ def train(cfg: DictConfig) -> None:
         num_workers=cfg.training.num_workers,
         image_size=cfg.dataset.image_size,
         aug_preset=cfg.aug.name,
+        val_ratio=cfg.dataset.split.val,
+        test_ratio=cfg.dataset.split.test,
+        seed=cfg.experiment.seed,
     )
 
     model = CrackSegmentor(
